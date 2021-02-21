@@ -1,70 +1,111 @@
 <div class="form-container">
-    <form [formGroup]="courseSelectionForm" (submit)="submit()">
+    <form #courseForm="ngForm" [formGroup]="courseSelectionForm" (submit)="submit(courseForm)">
         <mat-form-field class="form-field">
             <mat-label>
                 User Name
             </mat-label>
             <input matInput formControlName="userName" required>
+            <mat-error *ngIf="courseSelectionForm.controls.userName.touched && courseSelectionForm.controls.userName.invalid">
+                <span *ngIf="courseSelectionForm.controls.userName.errors.required">This field is mandatory</span>
+                <span *ngIf="courseSelectionForm.controls.userName.errors.pattern">This field is invalid(only alpha numeric characters are allowed)</span>
+            </mat-error>
         </mat-form-field>
         <mat-form-field class="form-field">
             <mat-label>
                 Email
             </mat-label>
             <input matInput formControlName="email" required>
+            <mat-error *ngIf="courseSelectionForm.controls.email.touched && courseSelectionForm.controls.email.invalid">
+                <span *ngIf="courseSelectionForm.controls.email.errors.required">This field is mandatory</span>
+            </mat-error>
         </mat-form-field>
         <mat-form-field class="form-field">
             <mat-label>
                 Student Id
             </mat-label>
             <input matInput formControlName="studentId" required>
+            <mat-error *ngIf="courseSelectionForm.controls.studentId.touched && courseSelectionForm.controls.studentId.invalid">
+                <span *ngIf="courseSelectionForm.controls.studentId.errors.required">This field is mandatory</span>
+                <span *ngIf="courseSelectionForm.controls.studentId.errors.pattern">This field is invalid(only alpha numeric characters are allowed)</span>
+            </mat-error>
         </mat-form-field>
         <mat-form-field class="form-field  drop-down">
             <mat-label>
                 Class Subject
             </mat-label>
-            <mat-select (selectionChange)="onSubjectSelectionChanged($event)">
+            <mat-select formControlName="classSubject" (selectionChange)="onSubjectSelectionChanged($event)" required>
+                <mat-option value="">Select a subject...</mat-option>
                 <mat-option *ngFor="let class of classSchedule" [value]="class">{{class.subject}}</mat-option>
             </mat-select>
+            <mat-error *ngIf="courseSelectionForm.controls.classSubject.touched && courseSelectionForm.controls.classSubject.invalid">
+                <span *ngIf="courseSelectionForm.controls.classSubject.errors.required">This field is mandatory</span>
+            </mat-error>
         </mat-form-field>
         <mat-form-field class="form-field  drop-down">
             <mat-label>
                 Class Topic
             </mat-label>
-            <mat-select (selectionChange)="onTopicSelectionChanged($event)">
-                <mat-option *ngFor="let topic of selectedSubjectTopics" [value]="topic">{{topic.name}}</mat-option>
+            <mat-select formControlName="classTopic" (selectionChange)="onTopicSelectionChanged($event)" required>
+                <mat-option *ngIf="!selectedSubjectTopics else subjectSelected" value="">Select a subject first</mat-option>
+                <ng-template #subjectSelected>
+                    <mat-option value="">Select a topic...</mat-option>
+                    <mat-option *ngFor="let topic of selectedSubjectTopics" [value]="topic">{{topic.name}}</mat-option>
+                </ng-template>
             </mat-select>
+            <mat-error *ngIf="courseSelectionForm.controls.classTopic.touched && courseSelectionForm.controls.classTopic.invalid">
+                <span *ngIf="courseSelectionForm.controls.classTopic.errors.required">This field is mandatory</span>
+            </mat-error>
         </mat-form-field>
         <mat-form-field class="form-field  drop-down">
             <mat-label>
                 Class Time Slot
             </mat-label>
-            <mat-select (selectionChange)="onTimeSlotSelectionChanged($event)">
-                <mat-option *ngFor="let timeSlot of selectedTopicTimeSlots" [value]="timeSlot">{{timeSlot}}</mat-option>
+            <mat-select formControlName="classTimeSlot" (selectionChange)="onTimeSlotSelectionChanged($event)" required>
+                <mat-option *ngIf="!selectedTopicTimeSlots else topicSelected" value="">Select a topic first</mat-option>
+                <ng-template #topicSelected>
+                    <mat-option value="">Select a time slot...</mat-option>
+                    <mat-option *ngFor="let timeSlot of selectedTopicTimeSlots" [value]="timeSlot" [disabled]="!canSelectTime(timeSlot)">{{timeSlot}}</mat-option>
+                </ng-template>
             </mat-select>
+            <mat-error *ngIf="courseSelectionForm.controls.classTimeSlot.touched && courseSelectionForm.controls.classTimeSlot.invalid">
+                <span *ngIf="courseSelectionForm.controls.classTimeSlot.errors.required">This field is mandatory</span>
+            </mat-error>
         </mat-form-field>
-        <button [disabled]="courseSelectionForm.invalid" mat-raised-button color="primary">Add Class</button>
+        <button type="submit" [disabled]="courseSelectionForm.invalid" mat-raised-button color="primary">Add Class</button>
     </form>
 </div>
 
 
-<div>
-    <table *ngIf="selectedClassSchedules.length > 0" mat-table [dataSource]="selectedClassSchedules" class="mat-elevation-z8">
-        <ng-container matColumnDef="subject">
-          <th mat-header-cell *matHeaderCellDef> Subject </th>
-          <td mat-cell *matCellDef="let element"> {{element.subject}} </td>
-        </ng-container>
-      
-        <ng-container matColumnDef="topic">
-          <th mat-header-cell *matHeaderCellDef> Topic </th>
-          <td mat-cell *matCellDef="let element"> {{element.topic}} </td>
-        </ng-container>
-      
-        <ng-container matColumnDef="timeSlot">
-          <th mat-header-cell *matHeaderCellDef> Time Slot </th>
-          <td mat-cell *matCellDef="let element"> {{element.timeSlot}} </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
+<div class="table-container">
+    <span *ngIf="selectedClassSchedules.length === 0 else selectedCourses" class="no-courses-text">
+        No courses selected
+    </span>
+    <ng-template #selectedCourses>
+        <div class="user-details">
+            <h3>User details</h3>
+            <div><span>User Name:</span> {{userName}}</div>
+            <div><span>Email:</span> {{email}}</div>
+            <div><span>Student Id:</span> {{studentId}}</div>
+        </div>
+        <h3>User's course schedule</h3>
+        <table mat-table [dataSource]="selectedClassSchedules" class="mat-elevation-z8">
+            <ng-container matColumnDef="subject">
+                <th mat-header-cell *matHeaderCellDef> Subject </th>
+                <td mat-cell *matCellDef="let element"> {{element.subject}} </td>
+            </ng-container>
+            
+            <ng-container matColumnDef="topic">
+                <th mat-header-cell *matHeaderCellDef> Topic </th>
+                <td mat-cell *matCellDef="let element"> {{element.topic}} </td>
+            </ng-container>
+            
+            <ng-container matColumnDef="timeSlot">
+                <th mat-header-cell *matHeaderCellDef> Time Slot </th>
+                <td mat-cell *matCellDef="let element"> {{element.timeSlot}} </td>
+            </ng-container>
+            
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+    </ng-template>
 </div>
