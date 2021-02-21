@@ -111,9 +111,14 @@ export class CourseSelectionComponent implements OnInit {
     this.selectedTimeSlot = timeSlot.value;
   }
   
-  public submit(form: FormGroupDirective): void {
+  public onFormSubmitted(form: FormGroupDirective): void {
     if(this.courseSelectionForm.invalid) {
       return;
+    }
+
+    if(this.userName !== this.courseSelectionForm.get('userName').value || this.email !== this.courseSelectionForm.get('email').value ||
+        this.studentId !== this.courseSelectionForm.get('studentId').value) {
+      this.selectedClassSchedules = [];
     }
 
     this.selectedClassSchedules.push({
@@ -125,30 +130,13 @@ export class CourseSelectionComponent implements OnInit {
     this.sortSelectedClassSchedules();
     this.table?.renderRows();
 
-    this.resetForm(form);
+    this.resetCourseSelectionForm(form);
   }
 
   private sortSelectedClassSchedules(): void {
     this.selectedClassSchedules.sort((a, b) => {
       return this.convertTimeToMinutes(a.timeSlot) - this.convertTimeToMinutes(b.timeSlot);
     });
-  }
-
-  private convertTimeToMinutes(time12h: string): number {
-      const [time, modifier] = time12h.split(' ');
-    
-      let [hours, minutes] = time.split(':');
-      let convertedHours = 0;
-    
-      if (hours === '12') {
-        convertedHours = 0;
-      }
-    
-      if (modifier === 'Pm') {
-        convertedHours = parseInt(hours, 10) + 12;
-      }
-    
-      return (convertedHours || parseInt(hours, 10))*60 + parseInt(minutes, 10);
   }
 
   public canSelectTime(time: string): boolean {
@@ -159,9 +147,26 @@ export class CourseSelectionComponent implements OnInit {
     let timeInMinutes = this.convertTimeToMinutes(time);
     const atleastOneTimeSlotIsInRange = existingScheduleTimes.some(t => Math.abs(t - timeInMinutes) < 60);
     return !atleastOneTimeSlotIsInRange;
-  }
+  }  
 
-  private resetForm(form: FormGroupDirective): void {
+  private convertTimeToMinutes(time12h: string): number {
+    const [time, modifier] = time12h.split(' ');
+  
+    let [hours, minutes] = time.split(':');
+    let convertedHours = 0;
+  
+    if (hours === '12') {
+      convertedHours = 0;
+    }
+  
+    if (modifier === 'Pm') {
+      convertedHours = parseInt(hours, 10) + 12;
+    }
+  
+    return (convertedHours || parseInt(hours, 10))*60 + parseInt(minutes, 10);
+}
+
+  private resetCourseSelectionForm(form: FormGroupDirective): void {
     this.userName = this.courseSelectionForm.get('userName').value;
     this.email = this.courseSelectionForm.get('email').value;
     this.studentId = this.courseSelectionForm.get('studentId').value;
@@ -173,6 +178,12 @@ export class CourseSelectionComponent implements OnInit {
       userName: this.userName,
       email: this.email,
       studentId: this.studentId,
+      classSubject: '',
+      classTopic: '',
+      classTimeSlot: '',
     });
+
+    this.selectedSubjectTopics = [];
+    this.selectedTopicTimeSlots = [];
   }
 }

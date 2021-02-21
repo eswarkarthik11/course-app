@@ -1,5 +1,5 @@
 <div class="form-container">
-    <form #courseForm="ngForm" [formGroup]="courseSelectionForm" (submit)="submit(courseForm)">
+    <form #courseForm="ngForm" [formGroup]="courseSelectionForm" (submit)="onFormSubmitted(courseForm)">
         <mat-form-field class="form-field">
             <mat-label>
                 User Name
