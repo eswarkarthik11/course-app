@@ -1,0 +1,70 @@
+<div class="form-container">
+    <form [formGroup]="courseSelectionForm" (submit)="submit()">
+        <mat-form-field class="form-field">
+            <mat-label>
+                User Name
+            </mat-label>
+            <input matInput formControlName="userName" required>
+        </mat-form-field>
+        <mat-form-field class="form-field">
+            <mat-label>
+                Email
+            </mat-label>
+            <input matInput formControlName="email" required>
+        </mat-form-field>
+        <mat-form-field class="form-field">
+            <mat-label>
+                Student Id
+            </mat-label>
+            <input matInput formControlName="studentId" required>
+        </mat-form-field>
+        <mat-form-field class="form-field  drop-down">
+            <mat-label>
+                Class Subject
+            </mat-label>
+            <mat-select (selectionChange)="onSubjectSelectionChanged($event)">
+                <mat-option *ngFor="let class of classSchedule" [value]="class">{{class.subject}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field class="form-field  drop-down">
+            <mat-label>
+                Class Topic
+            </mat-label>
+            <mat-select (selectionChange)="onTopicSelectionChanged($event)">
+                <mat-option *ngFor="let topic of selectedSubjectTopics" [value]="topic">{{topic.name}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field class="form-field  drop-down">
+            <mat-label>
+                Class Time Slot
+            </mat-label>
+            <mat-select (selectionChange)="onTimeSlotSelectionChanged($event)">
+                <mat-option *ngFor="let timeSlot of selectedTopicTimeSlots" [value]="timeSlot">{{timeSlot}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <button [disabled]="courseSelectionForm.invalid" mat-raised-button color="primary">Add Class</button>
+    </form>
+</div>
+
+
+<div>
+    <table *ngIf="selectedClassSchedules.length > 0" mat-table [dataSource]="selectedClassSchedules" class="mat-elevation-z8">
+        <ng-container matColumnDef="subject">
+          <th mat-header-cell *matHeaderCellDef> Subject </th>
+          <td mat-cell *matCellDef="let element"> {{element.subject}} </td>
+        </ng-container>
+      
+        <ng-container matColumnDef="topic">
+          <th mat-header-cell *matHeaderCellDef> Topic </th>
+          <td mat-cell *matCellDef="let element"> {{element.topic}} </td>
+        </ng-container>
+      
+        <ng-container matColumnDef="timeSlot">
+          <th mat-header-cell *matHeaderCellDef> Time Slot </th>
+          <td mat-cell *matCellDef="let element"> {{element.timeSlot}} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+</div>
